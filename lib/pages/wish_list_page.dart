@@ -1,28 +1,67 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mangeonsafro/components/wish_list_item.dart';
+import 'package:mangeonsafro/components/product_item.dart';
+import 'package:mangeonsafro/models/product.dart';
+import 'package:mangeonsafro/models/shop.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WishListPage extends StatefulWidget {
-  const WishListPage({Key? key}) : super(key: key);
+  final List<Shop>? shops;
+
+  const WishListPage({
+    Key? key,
+    @required this.shops
+  }) : super(key: key);
 
   @override
-  _WishListPageState createState() {
-    return _WishListPageState();
-  }
+  State<WishListPage> createState() => _WishListPageState();
 }
 
 class _WishListPageState extends State<WishListPage> with WidgetsBindingObserver {
+  bool isLoading = false;
+
+  List<Product> favoriteProducts = [];
+
+  void updateFavoriteProductsList(List<Product> newItemsList) {
+    setState(() {
+      favoriteProducts = newItemsList;
+    });
+  }
+
+  void fetchFavoriteProducts() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+
+    if (prefs.getStringList('FAVORITE_PRODUCTS') != null) {
+      for (var element in prefs.getStringList('FAVORITE_PRODUCTS')!) {
+        Product product = Product.fromJson(jsonDecode(element));
+        favoriteProducts.add(product);
+      }
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   void initState() {
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
+    fetchFavoriteProducts();
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -34,8 +73,8 @@ class _WishListPageState extends State<WishListPage> with WidgetsBindingObserver
   }
 
   Future<void> changeStatusBarColor() async {
-    await FlutterStatusbarcolor.setStatusBarColor(Colors.white);
-    FlutterStatusbarcolor.setStatusBarWhiteForeground(false);
+    await FlutterStatusbarcolor.setStatusBarColor(const Color.fromARGB(255, 216, 14, 39));
+    FlutterStatusbarcolor.setStatusBarWhiteForeground(true);
   }
 
   @override
@@ -44,22 +83,22 @@ class _WishListPageState extends State<WishListPage> with WidgetsBindingObserver
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.white,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.dark
+        statusBarColor: Color.fromARGB(255, 216, 14, 39),
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.light
       ),
       child: Scaffold(
-        backgroundColor: Colors.grey[100],
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          backgroundColor: const Color.fromARGB(255, 216, 14, 39),
+          systemOverlayStyle: SystemUiOverlayStyle.light,
           automaticallyImplyLeading: false,
           title: Text('MA LISTE DE SOUHAITS',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.sen(
               textStyle: const TextStyle(
-                color: Color.fromARGB(255, 11, 18, 42),
+                color: Colors.white,
                 fontSize: 18.0,
                 fontWeight: FontWeight.w700
               )
@@ -67,22 +106,48 @@ class _WishListPageState extends State<WishListPage> with WidgetsBindingObserver
           ),
           actions: const [],
         ),
-        body: ListView(
-          shrinkWrap: true,
-          children: const [
-            WishListItem(
-              title: 'Mossaka (poulet à la Moambe)',
-              subtitle: 'La Brasserie de la mer',
-              price: '2000',
-              productImageURL: 'https://firebasestorage.googleapis.com/v0/b/cerello-81465.appspot.com/o/Congo-Moambe-Chicken-3.jpg?alt=media&token=5f3385df-d89f-47ad-98f2-bb97b41b4e11',
-            ),
-            WishListItem(
-              title: 'Liboké',
-              subtitle: 'La Brasserie de la mer',
-              price: '1000',
-              productImageURL: 'https://firebasestorage.googleapis.com/v0/b/cerello-81465.appspot.com/o/liboke.jpg?alt=media&token=42112041-d328-4657-a924-4ddb3848d860',
-            ),
-          ],
+        body: isLoading ? const Center(
+          child: SpinKitFadingCircle(color: Color.fromARGB(255, 216, 14, 39), size: 40.0),
+        ) : favoriteProducts.isEmpty ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 304.0,
+                height: 304.0,
+                decoration: const BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/images/empty_wish_list.png')
+                    )
+                ),
+              ),
+              const Text('Votre liste de souhaits est vide',
+                style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w700
+                ),
+              ),
+              const SizedBox(height: 8.0),
+              Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: const Text('Vous pouvez enregistrer des produits dans cette liste et les commander plus tard.',
+                    textAlign: TextAlign.center,
+                  )
+              )
+            ]
+        ) : ListView.builder(
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            itemCount: favoriteProducts.length,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                child: ProductItem(
+                  product: favoriteProducts[index],
+                  shop: widget.shops!.firstWhere((shop) => shop.id.toString() == favoriteProducts[index].shop_id),
+                  updateFavoriteProductsList: updateFavoriteProductsList,
+                ),
+              );
+            }
         ),
       ),
     );

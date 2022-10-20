@@ -1,8 +1,11 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mangeonsafro/pages/checkout_pages/select_shipping_address_page.dart';
+import 'package:scale_button/scale_button.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -14,13 +17,13 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver {
   @override
   void initState() {
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -32,8 +35,8 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
   }
 
   Future<void> changeStatusBarColor() async {
-    await FlutterStatusbarcolor.setStatusBarColor(Colors.white);
-    FlutterStatusbarcolor.setStatusBarWhiteForeground(false);
+    await FlutterStatusbarcolor.setStatusBarColor(const Color.fromARGB(255, 216, 14, 39));
+    FlutterStatusbarcolor.setStatusBarWhiteForeground(true);
   }
 
   @override
@@ -42,22 +45,22 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.white,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.dark
+        statusBarColor: Color.fromARGB(255, 216, 14, 39),
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.light
       ),
       child: Scaffold(
-        backgroundColor: Colors.grey[100],
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          backgroundColor: const Color.fromARGB(255, 216, 14, 39),
+          systemOverlayStyle: SystemUiOverlayStyle.light,
           automaticallyImplyLeading: false,
           title: Text('PARAMÈTRES',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.sen(
               textStyle: const TextStyle(
-                color: Color.fromARGB(255, 11, 18, 42),
+                color: Colors.white,
                 fontSize: 18.0,
                 fontWeight: FontWeight.w700
               )
@@ -90,7 +93,7 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
 
                     Expanded(
                       child: Container(
-                        margin: const EdgeInsets.only(left: 16.0),
+                        margin: const EdgeInsets.only(left: 16.0, right: 16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -103,6 +106,7 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
                                 )
                               ),
                             ),
+
                             Container(
                               margin: const EdgeInsets.symmetric(vertical: 6.0),
                               child: Text('emidorego@gmail.com',
@@ -112,12 +116,147 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
                                   )
                                 ),
                               ),
-                            )
+                            ),
+
+                            ScaleButton(
+                              child: Container(
+                                height: 40.0,
+                                width: 168.0,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  border: Border.all(),
+                                  borderRadius: const BorderRadius.all(Radius.circular(32.0)),
+                                ),
+                                child: Text(
+                                  "MODIFIER LE PROFIL",
+                                  style: GoogleFonts.sen(
+                                    textStyle: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w700
+                                    )
+                                  ),
+                                ),
+                              ),
+                            ),
+
                           ],
                         ),
                       ),
                     )
                   ],
+                ),
+              ),
+
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  elevation: 8.0,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Icon(FlutterIcons.list_sli, color: Colors.grey[700]),
+                        title: Text('Toutes mes commandes',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      ),
+                      ListTile(
+                        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SelectShippingAddressPage())),
+                        leading: Icon(FlutterIcons.location_ent, color: Colors.grey[700]),
+                        title: Text('Mes adresses de livraisons',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      ),
+                      ListTile(
+                        leading: Icon(FlutterIcons.hourglass_ant, color: Colors.grey[700]),
+                        title: Text('Paiements en attente',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      ),
+                      ListTile(
+                        leading: Icon(FlutterIcons.checkcircleo_ant, color: Colors.grey[700]),
+                        title: Text('Commandes terminées',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+                child: Card(
+                  elevation: 8.0,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Icon(FlutterIcons.notifications_none_mdi, color: Colors.grey[700]),
+                        title: Text('Notifications',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      ),
+                      ListTile(
+                        leading: Icon(FlutterIcons.creditcard_ant, color: Colors.grey[700]),
+                        title: Text('Modes de paiement',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      ),
+                      ListTile(
+                        leading: Icon(FlutterIcons.attach_money_mdi, color: Colors.grey[700]),
+                        title: Text('Devises',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      ),
+                      ListTile(
+                        leading: Icon(FlutterIcons.language_mdi, color: Colors.grey[700]),
+                        title: Text('Langues',
+                          style: GoogleFonts.sen(
+                              textStyle: TextStyle(
+                                color: Colors.grey[700],
+                              )
+                          ),
+                        ),
+                        trailing: Icon(FlutterIcons.chevron_right_circle_mco, color: Colors.grey[700]),
+                      )
+                    ],
+                  ),
                 ),
               )
 

@@ -1,7 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:mangeonsafro/pages/onboarding_page.dart';
+import 'package:mangeonsafro/pages/checkout_pages/select_shipping_address_page.dart';
+import 'package:mangeonsafro/pages/main_page.dart';
+import 'package:shared_preferences_android/shared_preferences_android.dart';
+import 'package:shared_preferences_ios/shared_preferences_ios.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isAndroid) SharedPreferencesAndroid.registerWith();
+  if (Platform.isIOS) SharedPreferencesIOS.registerWith();
+
   runApp(const MyApp());
 }
 
@@ -14,10 +24,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
       debugShowCheckedModeBanner: false,
-      home: const OnboardingPage(),
+      home: const MainPage(),
     );
   }
 }

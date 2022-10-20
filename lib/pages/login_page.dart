@@ -1,8 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:mangeonsafro/pages/main_page.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:scale_button/scale_button.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,15 +22,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
+
+  String email = '';
+  String password = '';
+
+  bool isConnected = true;
+
   @override
   void initState() {
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -42,6 +55,22 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     changeStatusBarColor();
+
+    final ProgressDialog progressDialog = ProgressDialog(context, isDismissible: false);
+    progressDialog.style(
+      message: 'Connexion',
+      messageTextStyle: GoogleFonts.roboto(
+        textStyle: const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w500,
+          height: 1.25
+        )
+      ),
+      backgroundColor: Colors.white,
+      borderRadius: 0.0,
+      progressWidget: const SpinKitWave(color: Colors.blueAccent, size: 24.0),
+      insetAnimCurve: Curves.easeInOut,
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -143,7 +172,11 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         borderRadius: BorderRadius.all(Radius.circular(64.0),),
                       ),
                       child: TextFormField(
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          setState(() {
+                            email = value;
+                          });
+                        },
                         style: GoogleFonts.sen(
                           textStyle: const TextStyle(
                             color: Colors.black,
@@ -170,7 +203,11 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         borderRadius: BorderRadius.all(Radius.circular(64.0),),
                       ),
                       child: TextFormField(
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          setState(() {
+                            password = value;
+                          });
+                        },
                         style: GoogleFonts.sen(
                           textStyle: const TextStyle(
                             color: Colors.black,
@@ -211,6 +248,38 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                     ),
 
                     ScaleButton(
+                      onTap: () async {
+
+                        FocusScope.of(context).unfocus();
+
+                        await progressDialog.show();
+
+                        try {
+                          final result = await InternetAddress.lookup('google.com');
+                          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                            isConnected = true;
+
+                            await http.post(Uri.parse('https://mangeonsafro.kiits.net/public/api/v1/login'),
+                              body: {
+                                'email': email,
+                                'password': password
+                              }
+                            ).then((response) async {
+                              if (response.statusCode == 200) {
+                                await progressDialog.hide();
+                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const MainPage()));
+                              }
+                            });
+
+                          }
+                        } on SocketException catch (_) {
+                          isConnected = false;
+                          setState(() {});
+                        }
+
+                        await progressDialog.hide();
+
+                      },
                       child: Container(
                         height: 56.0,
                         width: MediaQuery.of(context).size.width,
@@ -278,6 +347,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                                 ),
                               ),
                             ),
+
 
                             Container(
                               margin: const EdgeInsets.only(right: 16.0),
